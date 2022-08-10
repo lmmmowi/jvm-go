@@ -7,6 +7,7 @@ import (
 
 type ClassReader struct {
 	utils.BytesReader
+	classFile *ClassFile
 }
 
 func newClassReader(data []byte) ClassReader {
@@ -14,4 +15,8 @@ func newClassReader(data []byte) ClassReader {
 	return ClassReader{
 		BytesReader: br,
 	}
+}
+
+func (reader *ClassReader) bind(classFile *ClassFile) {
+	reader.classFile = classFile
 }

@@ -22,6 +22,10 @@ const (
 	CONSTANT_InvokeDynamic      = 18
 )
 
+type ConstantPool struct {
+	constantInfos []ConstantInfo
+}
+
 type ConstantInfo interface{}
 
 type ConstantClassInfo struct {
@@ -66,24 +70,23 @@ type ConstantInvokeDynamicInfo struct {
 	NameAndTypeIndex         uint16
 }
 
-func readConstantPool(reader *ClassReader) []ConstantInfo {
+func readConstantPool(reader *ClassReader) ConstantPool {
 	count := int(reader.ReadUint16())
-	constantPool := make([]ConstantInfo, count)
-
+	constantInfos := make([]ConstantInfo, count)
 	for i := 1; i < count; i++ {
-		constantPool[i] = readConstantInfo(reader)
+		constantInfos[i] = readConstantInfo(reader)
 		// http://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.4.5
 		// All 8-byte constants take up two entries in the constant_pool table of the class file.
 		// If a CONSTANT_Long_info or CONSTANT_Double_info structure is the item in the constant_pool
 		// table at index n, then the next usable item in the pool is located at index n+2.
 		// The constant_pool index n+1 must be valid but is considered unusable.
-		switch constantPool[i].(type) {
+		switch constantInfos[i].(type) {
 		case int64, float64:
 			i++
 		}
 	}
 
-	return constantPool
+	return ConstantPool{constantInfos}
 }
 
 func readConstantInfo(reader *ClassReader) ConstantInfo {
@@ -293,40 +296,41 @@ func readConstantInvokeDynamicInfo(reader *ClassReader) ConstantInvokeDynamicInf
 	}
 }
 
-func constantInfoStringify(constantPool []ConstantInfo, i int) string {
-	info := constantPool[i]
+func (constantPool *ConstantPool) stringify(i uint16) string {
+	constantInfos := constantPool.constantInfos
+	info := constantInfos[i]
 	switch info.(type) {
 	case []byte:
 		return string(info.([]byte))
 	case ConstantClassInfo:
-		nameIndex := int(info.(ConstantClassInfo).NameIndex)
-		return constantInfoStringify(constantPool, nameIndex)
+		nameIndex := info.(ConstantClassInfo).NameIndex
+		return constantPool.stringify(nameIndex)
 	case ConstantStringInfo:
-		stringIndex := int(info.(ConstantStringInfo).StringIndex)
-		return constantInfoStringify(constantPool, stringIndex)
+		stringIndex := info.(ConstantStringInfo).StringIndex
+		return constantPool.stringify(stringIndex)
 	case ConstantFieldRefInfo:
-		classIndex := int(info.(ConstantFieldRefInfo).ClassIndex)
-		nameAndTypeIndex := int(info.(ConstantFieldRefInfo).NameAndTypeIndex)
-		className := constantInfoStringify(constantPool, classIndex)
-		nameAndDescriptor := constantInfoStringify(constantPool, nameAndTypeIndex)
+		classIndex := info.(ConstantFieldRefInfo).ClassIndex
+		nameAndTypeIndex := info.(ConstantFieldRefInfo).NameAndTypeIndex
+		className := constantPool.stringify(classIndex)
+		nameAndDescriptor := constantPool.stringify(nameAndTypeIndex)
 		return className + "@" + nameAndDescriptor
 	case ConstantMethodRefInfo:
-		classIndex := int(info.(ConstantMethodRefInfo).ClassIndex)
-		nameAndTypeIndex := int(info.(ConstantMethodRefInfo).NameAndTypeIndex)
-		className := constantInfoStringify(constantPool, classIndex)
-		nameAndDescriptor := constantInfoStringify(constantPool, nameAndTypeIndex)
+		classIndex := info.(ConstantMethodRefInfo).ClassIndex
+		nameAndTypeIndex := info.(ConstantMethodRefInfo).NameAndTypeIndex
+		className := constantPool.stringify(classIndex)
+		nameAndDescriptor := constantPool.stringify(nameAndTypeIndex)
 		return className + "." + nameAndDescriptor
 	case ConstantInterfaceRefInfo:
-		classIndex := int(info.(ConstantInterfaceRefInfo).ClassIndex)
-		nameAndTypeIndex := int(info.(ConstantInterfaceRefInfo).NameAndTypeIndex)
-		className := constantInfoStringify(constantPool, classIndex)
-		nameAndDescriptor := constantInfoStringify(constantPool, nameAndTypeIndex)
+		classIndex := info.(ConstantInterfaceRefInfo).ClassIndex
+		nameAndTypeIndex := info.(ConstantInterfaceRefInfo).NameAndTypeIndex
+		className := constantPool.stringify(classIndex)
+		nameAndDescriptor := constantPool.stringify(nameAndTypeIndex)
 		return className + "." + nameAndDescriptor
 	case ConstantNameAndTypeInfo:
-		nameIndex := int(info.(ConstantNameAndTypeInfo).NameIndex)
-		descriptorIndex := int(info.(ConstantNameAndTypeInfo).DescriptorIndex)
-		name := constantInfoStringify(constantPool, nameIndex)
-		descriptor := constantInfoStringify(constantPool, descriptorIndex)
+		nameIndex := info.(ConstantNameAndTypeInfo).NameIndex
+		descriptorIndex := info.(ConstantNameAndTypeInfo).DescriptorIndex
+		name := constantPool.stringify(nameIndex)
+		descriptor := constantPool.stringify(descriptorIndex)
 		return name + "#" + descriptor
 	default:
 		return fmt.Sprintf("%#v", info)

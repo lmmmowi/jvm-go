@@ -1,8 +1,14 @@
 package classfile
 
-type AttributeInfo struct {
-	AttributeNameIndex uint16
-	Info               []byte
+const (
+	Code                      = "Code"
+	RuntimeVisibleAnnotations = "RuntimeVisibleAnnotations"
+	Signature                 = "Signature"
+)
+
+type AttributeInfo interface {
+	getName() string
+	print()
 }
 
 func readAttributes(reader *ClassReader) []AttributeInfo {
@@ -16,11 +22,20 @@ func readAttributes(reader *ClassReader) []AttributeInfo {
 
 func readAttribute(reader *ClassReader) AttributeInfo {
 	nameIndex := reader.ReadUint16()
-	length := reader.ReadUint32()
-	info := reader.ReadBytes(int(length))
+	name := reader.classFile.constantPool.stringify(nameIndex)
+	attrLength := reader.ReadUint32()
 
-	return AttributeInfo{
-		AttributeNameIndex: nameIndex,
-		Info:               info,
+	switch name {
+	case Code:
+		return readCodeAttribute(reader)
+	case Signature:
+		return readSignatureAttribute(reader)
+	case RuntimeVisibleAnnotations:
+		return readRuntimeVisibleAnnotationsAttribute(reader)
+	default:
+		return UnparsedAttribute{
+			Name: name,
+			Info: reader.ReadBytes(int(attrLength)),
+		}
 	}
 }

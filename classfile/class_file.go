@@ -1,14 +1,10 @@
 package classfile
 
-import (
-	"fmt"
-)
-
 type ClassFile struct {
 	magic        uint32
 	minorVersion uint16
 	majorVersion uint16
-	constantPool []ConstantInfo
+	constantPool ConstantPool
 	accessFlags  uint16
 	thisClass    uint16
 	superClass   uint16
@@ -21,6 +17,7 @@ type ClassFile struct {
 func ParseClassFile(data []byte) *ClassFile {
 	reader := newClassReader(data)
 	cf := &ClassFile{}
+	reader.bind(cf)
 	cf.readMagic(&reader)
 	cf.readMinorVersion(&reader)
 	cf.readMajorVersion(&reader)
@@ -82,41 +79,4 @@ func (cf *ClassFile) readMethods(reader *ClassReader) {
 
 func (cf *ClassFile) readAttributes(reader *ClassReader) {
 	cf.attributes = readAttributes(reader)
-}
-
-func (cf *ClassFile) Print() {
-	// 魔数
-	fmt.Printf("magic number: %X\n", cf.magic)
-
-	// 编译版本
-	fmt.Printf("minor version %d\n", cf.minorVersion)
-	fmt.Printf("major version: %d\n", cf.majorVersion)
-
-	// 类名&接口
-	fmt.Printf("this class: %v\n", constantInfoStringify(cf.constantPool, int(cf.thisClass)))
-	fmt.Printf("super class: %v\n", constantInfoStringify(cf.constantPool, int(cf.superClass)))
-	for i := 0; i < len(cf.interfaces); i++ {
-		fmt.Printf("interface[%d]: %v\n", i, constantInfoStringify(cf.constantPool, int(cf.interfaces[i])))
-	}
-
-	// 字段
-	for i := 0; i < len(cf.fields); i++ {
-		field := cf.fields[i]
-		name := constantInfoStringify(cf.constantPool, int(field.NameIndex))
-		descriptor := constantInfoStringify(cf.constantPool, int(field.DescriptorIndex))
-		fmt.Printf("field[%d]: %b (%v) %v\n", i, field.AccessFlags, name, descriptor)
-	}
-
-	// 方法
-	for i := 0; i < len(cf.methods); i++ {
-		method := cf.methods[i]
-		name := constantInfoStringify(cf.constantPool, int(method.NameIndex))
-		descriptor := constantInfoStringify(cf.constantPool, int(method.DescriptorIndex))
-		fmt.Printf("method[%d]: %b %v %v\n", i, method.AccessFlags, name, descriptor)
-	}
-
-	// 常量池
-	//for i := 1; i < len(cf.constantPool); i++ {
-	//	fmt.Printf("constant pool[%d]: %T => %v\n", i, cf.constantPool[i], constantInfoStringify(cf.constantPool, i))
-	//}
 }
