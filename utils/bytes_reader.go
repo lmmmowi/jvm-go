@@ -45,3 +45,7 @@ func (reader *BytesReader) ReadBytes(n int) []byte {
 	reader.position += n
 	return bytes
 }
+
+func (reader *BytesReader) Position() int {
+	return reader.position
+}
