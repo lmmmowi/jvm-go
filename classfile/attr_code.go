@@ -1,6 +1,6 @@
 package classfile
 
-import "fmt"
+import "reflect"
 
 type CodeAttribute struct {
 	MaxStack       uint16
@@ -22,33 +22,30 @@ func readCodeAttribute(reader *ClassReader) CodeAttribute {
 		MaxStack:       reader.ReadUint16(),
 		MaxLocals:      reader.ReadUint16(),
 		Code:           reader.ReadBytes(int(reader.ReadUint32())),
-		ExceptionTable: readExceptionTable(reader),
+		ExceptionTable: reader.readTable(readExceptionTableEntry).([]ExceptionTableEntry),
 		AttributeTable: readAttributes(reader),
 	}
 }
 
-func readExceptionTable(reader *ClassReader) []ExceptionTableEntry {
-	count := int(reader.ReadUint16())
-	exceptionTableEntries := make([]ExceptionTableEntry, count)
-	for i := 0; i < count; i++ {
-		exceptionTableEntries[i] = ExceptionTableEntry{
-			StartPc:   reader.ReadUint16(),
-			EndPc:     reader.ReadUint16(),
-			HandlerPc: reader.ReadUint16(),
-			CatchType: reader.ReadUint16(),
-		}
+func readExceptionTableEntry(reader *ClassReader) ExceptionTableEntry {
+	return ExceptionTableEntry{
+		StartPc:   reader.ReadUint16(),
+		EndPc:     reader.ReadUint16(),
+		HandlerPc: reader.ReadUint16(),
+		CatchType: reader.ReadUint16(),
 	}
-	return exceptionTableEntries
 }
 
-func (attr CodeAttribute) getName() string {
-	return Code
-}
+func (attr CodeAttribute) print(placeHolder int) {
+	_println(placeHolder, "-MaxStack: %d", attr.MaxStack)
+	_println(placeHolder, "-MaxLocals: %d", attr.MaxLocals)
+	_println(placeHolder, "-Codes: %d", attr.Code)
 
-func (attr CodeAttribute) print() {
-	fmt.Printf("\t\t-MaxStack: %d\n", attr.MaxStack)
-	fmt.Printf("\t\t-MaxLocals: %d\n", attr.MaxLocals)
-	fmt.Printf("\t\t-Codes: %d\n", attr.Code)
-	fmt.Printf("\t\t-ExceptionTable: %v\n", attr.ExceptionTable)
-	fmt.Printf("\t\t-AttributeTable: %v\n", attr.AttributeTable)
+	_println(placeHolder, "-ExceptionTable: %v", attr.ExceptionTable)
+
+	_println(placeHolder, "-AttributeTable:")
+	for _, subAttr := range attr.AttributeTable {
+		_println(placeHolder+1, "-%v:", reflect.TypeOf(subAttr).Name())
+		subAttr.print(placeHolder + 2)
+	}
 }

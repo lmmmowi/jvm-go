@@ -22,10 +22,6 @@ const (
 	CONSTANT_InvokeDynamic      = 18
 )
 
-type ConstantPool struct {
-	constantInfos []ConstantInfo
-}
-
 type ConstantInfo interface{}
 
 type ConstantClassInfo struct {
@@ -70,23 +66,22 @@ type ConstantInvokeDynamicInfo struct {
 	NameAndTypeIndex         uint16
 }
 
-func readConstantPool(reader *ClassReader) ConstantPool {
+func readConstantPool(reader *ClassReader) []ConstantInfo {
 	count := int(reader.ReadUint16())
-	constantInfos := make([]ConstantInfo, count)
+	constantPool := make([]ConstantInfo, count)
 	for i := 1; i < count; i++ {
-		constantInfos[i] = readConstantInfo(reader)
+		constantPool[i] = readConstantInfo(reader)
 		// http://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.4.5
 		// All 8-byte constants take up two entries in the constant_pool table of the class file.
 		// If a CONSTANT_Long_info or CONSTANT_Double_info structure is the item in the constant_pool
 		// table at index n, then the next usable item in the pool is located at index n+2.
 		// The constant_pool index n+1 must be valid but is considered unusable.
-		switch constantInfos[i].(type) {
+		switch constantPool[i].(type) {
 		case int64, float64:
 			i++
 		}
 	}
-
-	return ConstantPool{constantInfos}
+	return constantPool
 }
 
 func readConstantInfo(reader *ClassReader) ConstantInfo {
@@ -296,41 +291,40 @@ func readConstantInvokeDynamicInfo(reader *ClassReader) ConstantInvokeDynamicInf
 	}
 }
 
-func (constantPool *ConstantPool) stringify(i uint16) string {
-	constantInfos := constantPool.constantInfos
+func constantStringify(constantInfos []ConstantInfo, i uint16) string {
 	info := constantInfos[i]
 	switch info.(type) {
 	case []byte:
 		return string(info.([]byte))
 	case ConstantClassInfo:
 		nameIndex := info.(ConstantClassInfo).NameIndex
-		return constantPool.stringify(nameIndex)
+		return constantStringify(constantInfos, nameIndex)
 	case ConstantStringInfo:
 		stringIndex := info.(ConstantStringInfo).StringIndex
-		return constantPool.stringify(stringIndex)
+		return constantStringify(constantInfos, stringIndex)
 	case ConstantFieldRefInfo:
 		classIndex := info.(ConstantFieldRefInfo).ClassIndex
 		nameAndTypeIndex := info.(ConstantFieldRefInfo).NameAndTypeIndex
-		className := constantPool.stringify(classIndex)
-		nameAndDescriptor := constantPool.stringify(nameAndTypeIndex)
+		className := constantStringify(constantInfos, classIndex)
+		nameAndDescriptor := constantStringify(constantInfos, nameAndTypeIndex)
 		return className + "@" + nameAndDescriptor
 	case ConstantMethodRefInfo:
 		classIndex := info.(ConstantMethodRefInfo).ClassIndex
 		nameAndTypeIndex := info.(ConstantMethodRefInfo).NameAndTypeIndex
-		className := constantPool.stringify(classIndex)
-		nameAndDescriptor := constantPool.stringify(nameAndTypeIndex)
+		className := constantStringify(constantInfos, classIndex)
+		nameAndDescriptor := constantStringify(constantInfos, nameAndTypeIndex)
 		return className + "." + nameAndDescriptor
 	case ConstantInterfaceRefInfo:
 		classIndex := info.(ConstantInterfaceRefInfo).ClassIndex
 		nameAndTypeIndex := info.(ConstantInterfaceRefInfo).NameAndTypeIndex
-		className := constantPool.stringify(classIndex)
-		nameAndDescriptor := constantPool.stringify(nameAndTypeIndex)
+		className := constantStringify(constantInfos, classIndex)
+		nameAndDescriptor := constantStringify(constantInfos, nameAndTypeIndex)
 		return className + "." + nameAndDescriptor
 	case ConstantNameAndTypeInfo:
 		nameIndex := info.(ConstantNameAndTypeInfo).NameIndex
 		descriptorIndex := info.(ConstantNameAndTypeInfo).DescriptorIndex
-		name := constantPool.stringify(nameIndex)
-		descriptor := constantPool.stringify(descriptorIndex)
+		name := constantStringify(constantInfos, nameIndex)
+		descriptor := constantStringify(constantInfos, descriptorIndex)
 		return name + "#" + descriptor
 	default:
 		return fmt.Sprintf("%#v", info)

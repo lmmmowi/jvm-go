@@ -1,28 +1,39 @@
 package classfile
 
 const (
-	Code                      = "Code"
-	RuntimeVisibleAnnotations = "RuntimeVisibleAnnotations"
-	Signature                 = "Signature"
+	ConstantValue                        = "ConstantValue"
+	Code                                 = "Code"
+	StackMapTable                        = "StackMapTable"
+	Exceptions                           = "Exceptions"
+	InnerClasses                         = "InnerClasses"
+	EnclosingMethod                      = "EnclosingMethod"
+	Synthetic                            = "Synthetic"
+	Signature                            = "Signature"
+	SourceFile                           = "SourceFile"
+	SourceDebugExtension                 = "SourceDebugExtension"
+	LineNumberTable                      = "LineNumberTable"
+	LocalVariableTable                   = "LocalVariableTable"
+	LocalVariableTypeTable               = "LocalVariableTypeTable"
+	Deprecated                           = "Deprecated"
+	RuntimeVisibleAnnotations            = "RuntimeVisibleAnnotations"
+	RuntimeInvisibleAnnotations          = "RuntimeInvisibleAnnotations"
+	RuntimeVisibleParameterAnnotations   = "RuntimeVisibleParameterAnnotations"
+	RuntimeInvisibleParameterAnnotations = "RuntimeInvisibleParameterAnnotations"
+	AnnotationDefault                    = "AnnotationDefault"
+	BoostrapMethods                      = "BoostrapMethods"
 )
 
 type AttributeInfo interface {
-	getName() string
-	print()
+	print(placeHolder int)
 }
 
 func readAttributes(reader *ClassReader) []AttributeInfo {
-	count := int(reader.ReadUint16())
-	attributes := make([]AttributeInfo, count)
-	for i := 0; i < count; i++ {
-		attributes[i] = readAttribute(reader)
-	}
-	return attributes
+	return reader.readTable(readAttribute).([]AttributeInfo)
 }
 
 func readAttribute(reader *ClassReader) AttributeInfo {
 	nameIndex := reader.ReadUint16()
-	name := reader.classFile.constantPool.stringify(nameIndex)
+	name := reader.classFile.getConstant(nameIndex)
 	attrLength := reader.ReadUint32()
 
 	switch name {
@@ -30,6 +41,12 @@ func readAttribute(reader *ClassReader) AttributeInfo {
 		return readCodeAttribute(reader)
 	case Signature:
 		return readSignatureAttribute(reader)
+	case LineNumberTable:
+		return readLineNumberTableAttribute(reader)
+	case LocalVariableTable:
+		return readLocalVariableTableAttribute(reader)
+	case LocalVariableTypeTable:
+		return readLocalVariableTypeTableAttribute(reader)
 	case RuntimeVisibleAnnotations:
 		return readRuntimeVisibleAnnotationsAttribute(reader)
 	default:

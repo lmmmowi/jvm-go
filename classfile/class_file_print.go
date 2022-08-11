@@ -1,6 +1,9 @@
 package classfile
 
-import "fmt"
+import (
+	"fmt"
+	"reflect"
+)
 
 func (cf *ClassFile) Print() {
 	printMagicNumber(cf)
@@ -12,51 +15,58 @@ func (cf *ClassFile) Print() {
 
 	// 常量池
 	//for i := 1; i < len(cf.constantPool); i++ {
-	//	fmt.Printf("constant pool[%d]: %T => %v\n", i, cf.constantPool[i], stringify(cf.constantPool, i))
+	//	fmt.Printf("constant pool[%d]: %T => %v\n", i, cf.constantPool[i], constantStringify(cf.constantPool, i))
 	//}
 }
 
+func _println(placeHolder int, format string, a ...interface{}) {
+	for i := 0; i < placeHolder; i++ {
+		fmt.Print("\t")
+	}
+	fmt.Printf(format+"\n", a...)
+}
+
 func printMagicNumber(cf *ClassFile) {
-	fmt.Printf("magic number: %X\n", cf.magic)
+	_println(0, "magic number: %X", cf.magic)
 }
 
 func printVersion(cf *ClassFile) {
-	fmt.Printf("minor version: %d\n", cf.minorVersion)
-	fmt.Printf("major version: %d\n", cf.majorVersion)
+	_println(0, "minor version: %d", cf.minorVersion)
+	_println(0, "major version: %d", cf.majorVersion)
 }
 
 func printClass(cf *ClassFile) {
-	fmt.Printf("this class: %v\n", cf.constantPool.stringify(cf.thisClass))
-	fmt.Printf("super class: %v\n", cf.constantPool.stringify(cf.superClass))
+	_println(0, "this class: %v", cf.getConstant(cf.thisClass))
+	_println(0, "super class: %v", cf.getConstant(cf.superClass))
 }
 
 func printInterfaces(cf *ClassFile) {
 	for i := 0; i < len(cf.interfaces); i++ {
-		fmt.Printf("interface[%d]: %v\n", i, cf.constantPool.stringify(cf.interfaces[i]))
+		_println(0, "interface[%d]: %v", i, cf.getConstant(cf.interfaces[i]))
 	}
 }
 
 func printFields(cf *ClassFile) {
 	for i, field := range cf.fields {
-		name := cf.constantPool.stringify(field.NameIndex)
-		descriptor := cf.constantPool.stringify(field.DescriptorIndex)
-		fmt.Printf("field[%d]: %b (%v) %v\n", i, field.AccessFlags, name, descriptor)
+		name := cf.getConstant(field.NameIndex)
+		descriptor := cf.getConstant(field.DescriptorIndex)
+		_println(0, "field[%d]: %b (%v) %v", i, field.AccessFlags, name, descriptor)
 		printAttributes(field.Attributes)
 	}
 }
 
 func printMethods(cf *ClassFile) {
 	for i, method := range cf.methods {
-		name := cf.constantPool.stringify(method.NameIndex)
-		descriptor := cf.constantPool.stringify(method.DescriptorIndex)
-		fmt.Printf("method[%d]: %b %v %v\n", i, method.AccessFlags, name, descriptor)
+		name := cf.getConstant(method.NameIndex)
+		descriptor := cf.getConstant(method.DescriptorIndex)
+		_println(0, "method[%d]: %b %v %v", i, method.AccessFlags, name, descriptor)
 		printAttributes(method.Attributes)
 	}
 }
 
 func printAttributes(attributes []AttributeInfo) {
 	for _, attr := range attributes {
-		fmt.Printf("\t-%v:\n", attr.getName())
-		attr.print()
+		_println(1, "-%v:", reflect.TypeOf(attr).Name())
+		attr.print(2)
 	}
 }

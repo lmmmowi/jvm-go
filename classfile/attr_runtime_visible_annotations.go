@@ -1,7 +1,5 @@
 package classfile
 
-import "fmt"
-
 type RuntimeVisibleAnnotationsAttribute struct {
 	Annotations []Annotation
 }
@@ -41,36 +39,21 @@ type ArrayValue struct {
 }
 
 func readRuntimeVisibleAnnotationsAttribute(reader *ClassReader) RuntimeVisibleAnnotationsAttribute {
-	count := reader.ReadUint16()
-	annotations := make([]Annotation, count)
-	for i := range annotations {
-		annotations[i] = readAnnotation(reader)
-	}
-
 	return RuntimeVisibleAnnotationsAttribute{
-		Annotations: annotations,
+		Annotations: reader.readTable(readAnnotation).([]Annotation),
 	}
 }
 
 func readAnnotation(reader *ClassReader) Annotation {
-	typeIndex := reader.ReadUint16()
-	typeName := reader.classFile.constantPool.stringify(typeIndex)
-
-	count := reader.ReadUint16()
-	elementValuePairs := make([]ElementValuePair, count)
-	for i := range elementValuePairs {
-		elementValuePairs[i] = readElementValuePair(reader)
-	}
-
 	return Annotation{
-		TypeName:          typeName,
-		ElementValuePairs: elementValuePairs,
+		TypeName:          reader.classFile.getConstant(reader.ReadUint16()),
+		ElementValuePairs: reader.readTable(readElementValuePair).([]ElementValuePair),
 	}
 }
 
 func readElementValuePair(reader *ClassReader) ElementValuePair {
 	nameIndex := reader.ReadUint16()
-	name := reader.classFile.constantPool.stringify(nameIndex)
+	name := reader.classFile.getConstant(nameIndex)
 
 	return ElementValuePair{
 		Name:  name,
@@ -96,7 +79,7 @@ func readElementValue(reader *ClassReader) ElementValue {
 		}
 	case '[':
 		return ArrayValue{
-			Elements: readElementValues(reader),
+			Elements: reader.readTable(readElementValue).([]ElementValue),
 		}
 	default:
 		return ConstValue{
@@ -106,25 +89,12 @@ func readElementValue(reader *ClassReader) ElementValue {
 	}
 }
 
-func readElementValues(reader *ClassReader) []ElementValue {
-	count := reader.ReadUint16()
-	elementValues := make([]ElementValue, count)
-	for i := range elementValues {
-		elementValues[i] = readElementValue(reader)
-	}
-	return elementValues
-}
-
-func (attr RuntimeVisibleAnnotationsAttribute) getName() string {
-	return RuntimeVisibleAnnotations
-}
-
-func (attr RuntimeVisibleAnnotationsAttribute) print() {
+func (attr RuntimeVisibleAnnotationsAttribute) print(placeHolder int) {
 	for _, annotation := range attr.Annotations {
-		fmt.Printf("\t\t-[%v]:\n", annotation.TypeName)
+		_println(placeHolder, "-[%v]:", annotation.TypeName)
 
 		for _, pair := range annotation.ElementValuePairs {
-			fmt.Printf("\t\t\t-%v: %v\n", pair.Name, pair.Value)
+			_println(placeHolder+1, "-%v: %v", pair.Name, pair.Value)
 		}
 	}
 }

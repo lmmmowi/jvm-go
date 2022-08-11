@@ -1,6 +1,8 @@
 package utils
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+)
 
 type BytesReader struct {
 	byteOrder binary.ByteOrder

@@ -4,7 +4,7 @@ type ClassFile struct {
 	magic        uint32
 	minorVersion uint16
 	majorVersion uint16
-	constantPool ConstantPool
+	constantPool []ConstantInfo
 	accessFlags  uint16
 	thisClass    uint16
 	superClass   uint16
@@ -61,22 +61,23 @@ func (cf *ClassFile) readSuperClass(reader *ClassReader) {
 }
 
 func (cf *ClassFile) readInterfaces(reader *ClassReader) {
-	count := int(reader.ReadUint16())
-	interfaces := make([]uint16, count)
-	for i := 0; i < count; i++ {
-		interfaces[i] = reader.ReadUint16()
-	}
-	cf.interfaces = interfaces
+	cf.interfaces = reader.readTable(func(r *ClassReader) uint16 {
+		return r.ReadUint16()
+	}).([]uint16)
 }
 
 func (cf *ClassFile) readFields(reader *ClassReader) {
-	cf.fields = readFields(reader)
+	cf.fields = reader.readTable(readField).([]FieldInfo)
 }
 
 func (cf *ClassFile) readMethods(reader *ClassReader) {
-	cf.methods = readMethods(reader)
+	cf.methods = reader.readTable(readMethod).([]MethodInfo)
 }
 
 func (cf *ClassFile) readAttributes(reader *ClassReader) {
 	cf.attributes = readAttributes(reader)
+}
+
+func (cf *ClassFile) getConstant(index uint16) string {
+	return constantStringify(cf.constantPool, index)
 }

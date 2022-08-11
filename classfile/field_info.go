@@ -19,15 +19,6 @@ type FieldInfo struct {
 	Attributes      []AttributeInfo
 }
 
-func readFields(reader *ClassReader) []FieldInfo {
-	count := int(reader.ReadUint16())
-	fields := make([]FieldInfo, count)
-	for i := 0; i < count; i++ {
-		fields[i] = readField(reader)
-	}
-	return fields
-}
-
 func readField(reader *ClassReader) FieldInfo {
 	return FieldInfo{
 		AccessFlags:     reader.ReadUint16(),
