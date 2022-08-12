@@ -59,12 +59,22 @@ func (stack *OperandStack) PopDouble() float64 {
 	return math.Float64frombits(bits)
 }
 
-func (stack *OperandStack) SetRef(ref *Object) {
+func (stack *OperandStack) PushRef(ref *Object) {
 	stack.slots[stack.size].ref = ref
 	stack.size++
 }
 
-func (stack *OperandStack) GetRef() *Object {
+func (stack *OperandStack) PopRef() *Object {
 	stack.size--
 	return stack.slots[stack.size].ref
+}
+
+func (stack *OperandStack) PushSlot(slot Slot) {
+	stack.slots[stack.size] = slot
+	stack.size++
+}
+
+func (stack *OperandStack) PopSlot() Slot {
+	stack.size--
+	return stack.slots[stack.size]
 }
