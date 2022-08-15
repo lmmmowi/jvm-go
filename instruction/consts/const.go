@@ -11,130 +11,130 @@ import (
 
 /*********************** object(1) ***********************/
 
-type ACONST_NULL struct {
+type AconstNull struct {
 	base.NoOperandsInstruction
 }
 
-func (inst *ACONST_NULL) Execute(frame *rtda.Frame) {
+func (inst *AconstNull) Execute(frame *rtda.Frame) {
 	frame.OperandStack().PushRef(nil)
 }
 
 /*********************** int(7) ***********************/
 
-type ICONST_0 struct {
+type IConst0 struct {
 	base.NoOperandsInstruction
 }
 
-func (inst *ICONST_0) Execute(frame *rtda.Frame) {
+func (inst *IConst0) Execute(frame *rtda.Frame) {
 	frame.OperandStack().PushInt(0)
 }
 
-type ICONST_1 struct {
+type IConst1 struct {
 	base.NoOperandsInstruction
 }
 
-func (inst *ICONST_1) Execute(frame *rtda.Frame) {
+func (inst *IConst1) Execute(frame *rtda.Frame) {
 	frame.OperandStack().PushInt(1)
 }
 
-type ICONST_2 struct {
+type IConst2 struct {
 	base.NoOperandsInstruction
 }
 
-func (inst *ICONST_2) Execute(frame *rtda.Frame) {
+func (inst *IConst2) Execute(frame *rtda.Frame) {
 	frame.OperandStack().PushInt(2)
 }
 
-type ICONST_3 struct {
+type IConst3 struct {
 	base.NoOperandsInstruction
 }
 
-func (inst *ICONST_3) Execute(frame *rtda.Frame) {
+func (inst *IConst3) Execute(frame *rtda.Frame) {
 	frame.OperandStack().PushInt(3)
 }
 
-type ICONST_4 struct {
+type IConst4 struct {
 	base.NoOperandsInstruction
 }
 
-func (inst *ICONST_4) Execute(frame *rtda.Frame) {
+func (inst *IConst4) Execute(frame *rtda.Frame) {
 	frame.OperandStack().PushInt(5)
 }
 
-type ICONST_5 struct {
+type IConst5 struct {
 	base.NoOperandsInstruction
 }
 
-func (inst *ICONST_5) Execute(frame *rtda.Frame) {
+func (inst *IConst5) Execute(frame *rtda.Frame) {
 	frame.OperandStack().PushInt(5)
 }
 
-type ICONST_M1 struct {
+type IConstM1 struct {
 	base.NoOperandsInstruction
 }
 
-func (inst *ICONST_M1) Execute(frame *rtda.Frame) {
+func (inst *IConstM1) Execute(frame *rtda.Frame) {
 	frame.OperandStack().PushInt(-1)
 }
 
 /*********************** long(2) ***********************/
 
-type LCONST_0 struct {
+type LConst0 struct {
 	base.NoOperandsInstruction
 }
 
-func (inst *LCONST_0) Execute(frame *rtda.Frame) {
+func (inst *LConst0) Execute(frame *rtda.Frame) {
 	frame.OperandStack().PushLong(0)
 }
 
-type LCONST_1 struct {
+type LConst1 struct {
 	base.NoOperandsInstruction
 }
 
-func (inst *LCONST_1) Execute(frame *rtda.Frame) {
+func (inst *LConst1) Execute(frame *rtda.Frame) {
 	frame.OperandStack().PushLong(1)
 }
 
 /*********************** float(3) ***********************/
 
-type FCONST_0 struct {
+type FConst0 struct {
 	base.NoOperandsInstruction
 }
 
-func (inst *FCONST_0) Execute(frame *rtda.Frame) {
+func (inst *FConst0) Execute(frame *rtda.Frame) {
 	frame.OperandStack().PushFloat(0.0)
 }
 
-type FCONST_1 struct {
+type FConst1 struct {
 	base.NoOperandsInstruction
 }
 
-func (inst *FCONST_1) Execute(frame *rtda.Frame) {
+func (inst *FConst1) Execute(frame *rtda.Frame) {
 	frame.OperandStack().PushFloat(1.0)
 }
 
-type FCONST_2 struct {
+type FConst2 struct {
 	base.NoOperandsInstruction
 }
 
-func (inst *FCONST_2) Execute(frame *rtda.Frame) {
+func (inst *FConst2) Execute(frame *rtda.Frame) {
 	frame.OperandStack().PushFloat(2.0)
 }
 
 /*********************** double(2) ***********************/
 
-type DCONST_0 struct {
+type DConst0 struct {
 	base.NoOperandsInstruction
 }
 
-func (inst *DCONST_0) Execute(frame *rtda.Frame) {
+func (inst *DConst0) Execute(frame *rtda.Frame) {
 	frame.OperandStack().PushDouble(0.0)
 }
 
-type DCONST_1 struct {
+type DConst1 struct {
 	base.NoOperandsInstruction
 }
 
-func (inst *DCONST_1) Execute(frame *rtda.Frame) {
+func (inst *DConst1) Execute(frame *rtda.Frame) {
 	frame.OperandStack().PushDouble(1.0)
 }

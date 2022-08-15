@@ -9,43 +9,43 @@ import (
 /*****************    istore系列指令共5条    *****************/
 /***********************************************************/
 
-type ISTORE struct {
+type IStore struct {
 	base.Index8Instruction
 }
 
-func (inst *ISTORE) Execute(frame *rtda.Frame) {
+func (inst *IStore) Execute(frame *rtda.Frame) {
 	_istore(frame, inst.Index)
 }
 
-type ISTOER_0 struct {
+type IStore0 struct {
 	base.NoOperandsInstruction
 }
 
-func (inst *ISTOER_0) Execute(frame *rtda.Frame) {
+func (inst *IStore0) Execute(frame *rtda.Frame) {
 	_istore(frame, 0)
 }
 
-type ISTORE_1 struct {
+type IStore1 struct {
 	base.NoOperandsInstruction
 }
 
-func (inst *ISTORE_1) Execute(frame *rtda.Frame) {
+func (inst *IStore1) Execute(frame *rtda.Frame) {
 	_istore(frame, 1)
 }
 
-type ISTORE_2 struct {
+type IStore2 struct {
 	base.NoOperandsInstruction
 }
 
-func (inst *ISTORE_2) Execute(frame *rtda.Frame) {
+func (inst *IStore2) Execute(frame *rtda.Frame) {
 	_istore(frame, 2)
 }
 
-type ISTORE_3 struct {
+type IStore3 struct {
 	base.NoOperandsInstruction
 }
 
-func (inst *ISTORE_3) Execute(frame *rtda.Frame) {
+func (inst *IStore3) Execute(frame *rtda.Frame) {
 	_istore(frame, 3)
 }
 

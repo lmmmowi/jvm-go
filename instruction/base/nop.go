@@ -2,10 +2,10 @@ package base
 
 import "github.com/lmmmowi/jvm-go/rtda"
 
-type NOP struct {
+type Nop struct {
 	NoOperandsInstruction
 }
 
-func (inst *NOP) Execute(frame *rtda.Frame) {
+func (inst *Nop) Execute(frame *rtda.Frame) {
 	// do nothing
 }
