@@ -18,6 +18,10 @@ func newFrame(maxLocals uint, maxStack uint) *Frame {
 	}
 }
 
+func (frame *Frame) Pop() Slot {
+	return frame.operandStack.PopSlot()
+}
+
 func (frame *Frame) LocalVars() LocalVars {
 	return frame.localVars
 }

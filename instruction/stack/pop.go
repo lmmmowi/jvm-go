@@ -9,20 +9,20 @@ import (
 /*****************    pop系列指令共2条    *****************/
 /********************************************************/
 
-type POP struct {
+type Pop struct {
 	base.NoOperandsInstruction
 }
 
-func (inst *POP) Execute(frame *rtda.Frame) {
+func (inst *Pop) Execute(frame *rtda.Frame) {
 	stack := frame.OperandStack()
 	stack.PopSlot()
 }
 
-type POP2 struct {
+type Pop2 struct {
 	base.NoOperandsInstruction
 }
 
-func (inst *POP2) Execute(frame *rtda.Frame) {
+func (inst *Pop2) Execute(frame *rtda.Frame) {
 	stack := frame.OperandStack()
 	stack.PopSlot()
 	stack.PopSlot()
