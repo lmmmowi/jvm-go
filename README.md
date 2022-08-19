@@ -11,3 +11,24 @@
 ```sh
 go build github.com/lmmmowi/jvm-go/cmd/java
 ```
+
+## JVM相关知识
+
+### Class结构
+
+### 字节码指令集
++ 常量指令【18】
+    + nop
+    + const系列（共15条）
+    + push系列（共2条）
++ 加载指令【10】
+    + iload系列（共5条）
+    + lload系列（共5条）
++ 存储指令【5】
+    + istore系列（共5条）
++ 栈操作指令【9】
+    + pop系列（共2条）
+    + dup系列（共6条）
+    + swap
+  
+> 参考文档：https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-6.html#jvms-6.5
